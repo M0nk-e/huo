@@ -30,7 +30,6 @@ impl Downloader {
 
         let pb = ProgressBar::new(pages.len() as u64);
 
-        // Use unwrap_or to provide fallback style if template fails
         let style = ProgressStyle::default_bar()
             .template("{msg} [{bar:40.cyan/blue}] {pos}/{len}")
             .unwrap_or_else(|_| ProgressStyle::default_bar())
@@ -51,7 +50,7 @@ impl Downloader {
                         let ext = url
                             .split('?')
                             .next()
-                            .and_then(|u| u.split('.').last())
+                            .and_then(|u| u.split('.').next_back())
                             .unwrap_or("jpg");
                         let filename = format!("{:03}.{}", idx + 1, ext);
                         fs::write(save_dir.join(filename), bytes)?;

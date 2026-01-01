@@ -14,40 +14,30 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
-    /// Download manga chapters
     Download {
-        /// Source: asura, demonic, flame
         #[arg(short, long)]
         source: Option<String>,
 
-        /// Series URL
         #[arg(short, long)]
         url: Option<String>,
 
-        /// Download specific chapters (e.g., "1,2,3" or "1-5")
         #[arg(short, long)]
         chapters: Option<String>,
 
-        /// Download all chapters (including already downloaded)
         #[arg(short, long)]
         all: bool,
 
-        /// Skip confirmation prompts
         #[arg(short = 'y', long)]
         yes: bool,
     },
 
-    /// Search for manga
     Search {
-        /// Source: asura, demonic, flame
         #[arg(short, long)]
         source: Option<String>,
 
-        /// Search query
         query: Option<String>,
     },
 
-    /// List available sources
     Sources,
 }
 
@@ -55,7 +45,6 @@ enum Commands {
 async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let cli = Cli::parse();
 
-    // If no command provided, run interactive mode
     if cli.command.is_none() {
         return interactive_mode().await;
     }
@@ -145,7 +134,6 @@ async fn handle_download(
     let client = build_client()?;
     let plugins = get_plugins();
 
-    // Select source
     let plugin = if let Some(src) = source {
         plugins
             .iter()
@@ -160,7 +148,6 @@ async fn handle_download(
         &plugins[selection]
     };
 
-    // Get URL
     let url = if let Some(u) = url {
         u
     } else {
@@ -169,7 +156,6 @@ async fn handle_download(
             .interact_text()?
     };
 
-    // Pass the CLI arguments into the downloader logic
     download_manga_advanced(&client, plugin.as_ref(), &url, chapters_arg, all, yes).await
 }
 
@@ -192,7 +178,6 @@ async fn download_manga_advanced(
 
     let mut state = MangaState::load_or_new(&title, url);
 
-    // Filter chapters based on whether --all was passed
     let mut target_chapters = if all {
         all_chapters.clone()
     } else {
@@ -203,7 +188,6 @@ async fn download_manga_advanced(
             .collect()
     };
 
-    // If specific chapters were requested via --chapters "1,2,5"
     if let Some(arg) = chapters_arg {
         let wanted: Vec<&str> = arg.split(',').collect();
         target_chapters.retain(|c| wanted.contains(&c.number.as_str()));
@@ -214,7 +198,6 @@ async fn download_manga_advanced(
         return Ok(());
     }
 
-    // Interactive confirmation (skipped if --yes is used)
     if !yes {
         println!("✓ Found {} chapters for {}", target_chapters.len(), title);
         let confirm = Confirm::new()
@@ -274,7 +257,6 @@ async fn handle_search(
     };
 
     if let Some(q) = query {
-        // Direct search
         println!("🔍 Searching for '{}'...", q);
         let results = plugin.search(&client, &q).await?;
 
@@ -288,7 +270,6 @@ async fn handle_search(
             println!("   {}", result.url);
         }
     } else {
-        // TUI search
         match tui::search::run_search_tui(&client, plugin.as_ref()).await? {
             Some(url) => println!("✓ Selected: {}", url),
             None => println!("✗ Search cancelled"),

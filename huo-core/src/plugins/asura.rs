@@ -105,18 +105,15 @@ impl MangaPlugin for AsuraScans {
         let html = client.get(&url).send().await?.text().await?;
         let document = Html::parse_document(&html);
 
-        // This stays the same since it works for you
         let selector = Selector::parse("a[href^='series/']").unwrap();
-        // New selector just for the title span inside the anchor
         let title_span_selector = Selector::parse("span.block.font-bold").unwrap();
 
         let mut results = Vec::new();
 
         for el in document.select(&selector) {
-            // FIX: Instead of el.text(), we target the specific span
             let title = match el.select(&title_span_selector).next() {
                 Some(span) => span.text().collect::<String>().trim().to_string(),
-                None => el.text().collect::<String>().trim().to_string(), // Fallback
+                None => el.text().collect::<String>().trim().to_string(),
             };
 
             let href = match el.value().attr("href") {

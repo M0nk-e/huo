@@ -49,7 +49,6 @@ impl MangaPlugin for FlameComics {
         let html = client.get(url).send().await?.text().await?;
         let json_data = self.extract_next_data(&html)?;
 
-       
         let chapters_val = self
             .find_key(&json_data, "chapters")
             .ok_or("Could not find chapters in page data")?;
@@ -72,7 +71,6 @@ impl MangaPlugin for FlameComics {
             });
         }
 
-        // numeric sort
         results.sort_by(|a, b| {
             let a_num: f64 = a.number.parse().unwrap_or(0.0);
             let b_num: f64 = b.number.parse().unwrap_or(0.0);
@@ -92,24 +90,19 @@ impl MangaPlugin for FlameComics {
         let html = client.get(chapter_url).send().await?.text().await?;
         let json_data = self.extract_next_data(&html)?;
 
-        // Find the chapter data
         let chapter_val = self
             .find_key(&json_data, "chapter")
             .ok_or("Could not find chapter data")?;
 
-        // Get series_id and token
         let series_id = chapter_val["series_id"]
             .as_i64()
             .ok_or("series_id not found")?;
         let token = chapter_val["token"].as_str().ok_or("token not found")?;
 
-        // Get images object
         let images_val = chapter_val.get("images").ok_or("images field not found")?;
 
-        // Images is an object with numeric keys, not an array
         let images_obj = images_val.as_object().ok_or("images is not an object")?;
 
-        // Convert to sorted vector of (index, name) pairs
         let mut image_pairs: Vec<(usize, String)> = images_obj
             .iter()
             .filter_map(|(key, val)| {
@@ -119,15 +112,12 @@ impl MangaPlugin for FlameComics {
             })
             .collect();
 
-        // Sort by index to maintain order
         image_pairs.sort_by_key(|(idx, _)| *idx);
 
-        // Build full URLs
         let base_url = "https://cdn.flamecomics.xyz/uploads/images/series";
         let pages: Vec<String> = image_pairs
             .iter()
             .map(|(_, name)| {
-                // Remove query params if present and rebuild
                 let clean_name = name.split('?').next().unwrap_or(name);
                 format!("{}/{}/{}/{}", base_url, series_id, token, clean_name)
             })
@@ -161,12 +151,10 @@ impl MangaPlugin for FlameComics {
                 None => continue,
             };
 
-            // Filter out non-relevant links
             if title.is_empty() || title.len() < 2 {
                 continue;
             }
 
-            // Only include if matches query
             if title.to_lowercase().contains(&q) {
                 let full_url = format!("https://flamecomics.xyz{}", href);
                 if seen.insert(full_url.clone()) {

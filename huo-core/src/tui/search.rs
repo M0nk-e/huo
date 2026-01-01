@@ -112,14 +112,12 @@ async fn run_app(
                         KeyCode::Esc | KeyCode::Char('q') => return Ok(None),
                         KeyCode::Enter => {
                             if !app.results.is_empty() && app.list_state.selected().is_some() {
-                                // Select result
                                 app.select();
                                 return Ok(app.selected_url.clone());
                             } else if !app.query.is_empty()
                                 && !app.is_searching
                                 && app.results.is_empty()
                             {
-                                // Perform search
                                 app.is_searching = true;
                                 app.error_message = None;
                                 terminal.draw(|f| ui(f, app))?;
@@ -176,7 +174,6 @@ fn ui(f: &mut Frame, app: &SearchApp) {
         ])
         .split(f.area());
 
-    // Search input
     let input_text = if app.is_searching {
         format!("{}█ [Searching...]", app.query)
     } else {
@@ -192,7 +189,6 @@ fn ui(f: &mut Frame, app: &SearchApp) {
         );
     f.render_widget(input, chunks[0]);
 
-    // Results list
     let items: Vec<ListItem> = app
         .results
         .iter()
@@ -224,7 +220,6 @@ fn ui(f: &mut Frame, app: &SearchApp) {
 
     f.render_stateful_widget(results_list, chunks[1], &mut app.list_state.clone());
 
-    // Status bar
     let status_text = if let Some(ref error) = app.error_message {
         Line::from(vec![
             Span::styled("❌ ", Style::default().fg(Color::Red)),
