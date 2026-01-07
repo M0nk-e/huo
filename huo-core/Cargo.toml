@@ -11,16 +11,20 @@ categories = { workspace = true }
 description = "Core library for Huo manga downloader"
 
 [dependencies]
-async-trait = { workspace = true }
-chrono = { workspace = true }
-dirs = { workspace = true }
-indicatif = { workspace = true }
-regex = { workspace = true }
-reqwest = { workspace = true }
-scraper = { workspace = true }
-serde = { workspace = true }
-serde_json = { workspace = true }
-tokio = { workspace = true }
-urlencoding = { workspace = true }
-crossterm = { workspace = true }
-ratatui = { workspace = true }
+async-trait={ workspace = true }
+chrono={ workspace = true }
+dirs={ workspace = true }
+indicatif={ workspace = true }
+regex={ workspace = true }
+reqwest={ workspace = true }
+scraper={ workspace = true }
+serde={ workspace = true }
+serde_json={ workspace = true }
+tokio={ workspace = true }
+urlencoding={ workspace = true }
+crossterm={ workspace = true }
+ratatui={ workspace = true }
+notify-rust={ workspace = true }
+toml={ workspace = true }
+sqlx={ workspace = true }
+walkdir={ workspace = true }
